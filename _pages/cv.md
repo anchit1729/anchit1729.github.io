@@ -3,7 +3,6 @@ layout: cv
 permalink: /cv/
 title: cv
 nav: true
-nav_order: 4
+nav_order: 3
 cv_pdf: Anchit_CV.pdf
-description: An overview of my academic and work experiences.
 ---
