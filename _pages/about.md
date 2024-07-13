@@ -17,8 +17,8 @@ latest_posts: false # includes a list of the newest posts
 selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true  # includes social icons at the bottom of the page
 ---
-I am a Computer Science Master's student at the University of Waterloo, working in Human-Computer Interaction under the supervision of [Prof. Oliver Schneider](http://oliverschneider.ca). My primary research interests include applying Machine Learning methods in multimodal human-centric contexts, primarily design tools and interfaces. 
+I am a Computer Science Master's student at the University of Waterloo, working in Human-Computer Interaction under the supervision of [Prof. Oliver Schneider](http://oliverschneider.ca). My primary research interests include enabling multimodal interactions in the context of mixed-reality applications. This work often involves the use of techniques from machine learning and computer graphics, alongside empirical research methods common in HCI. 
 
-Outside of research, I enjoy playing around with Computer Graphics techniques, with a focus on physics-based animation and a bit of physically-based rendering on the side. I also enjoy working with distributed systems and parallel programming. 
+Outside of research, I enjoy playing around with Computer Graphics techniques, with a focus on physics-based animation and a bit of physically-based rendering on the side. I'm also a big math-head, and like to read up on math research in my free time. Fun fact: I have an Erdos number of 4. 
 
-My other interests include running, playing video games and watching anime/reading manga.
+My other interests include running/lifting, playing video games and watching anime/reading manga.
