@@ -17,8 +17,8 @@ latest_posts: false # includes a list of the newest posts
 selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true  # includes social icons at the bottom of the page
 ---
-I am a Computer Science Master's student at the University of Waterloo, working in Human-Computer Interaction under the supervision of [Prof. Oliver Schneider](http://oliverschneider.ca). My primary research interests include enabling multimodal interactions in the context of mixed-reality applications. This work often involves the use of techniques from machine learning and computer graphics, alongside empirical research methods common in HCI. 
+I am a PhD student at the University of Waterloo, working in Human-Computer Interaction under the supervision of [Profs. Oliver Schneider](http://oliverschneider.ca), [Matthew Brehmer](http://mattbrehmer.ca) and Daniel Vogel. My primary research interests include exploring the use of multimodal interactions in the context of mixed-reality applications. This work often involves the use of techniques from machine learning, computer graphics, and haptics, alongside empirical research methods common in HCI. 
 
-Outside of research, I enjoy playing around with Computer Graphics techniques, with a focus on physics-based animation and a bit of physically-based rendering on the side. I'm also a big math-head, and like to read up on math research in my free time. I recently found out that I have an Erdos number of 4, which was nice. 
+Outside of research, I enjoy playing around with Computer Graphics techniques, with a focus on physics-based animation and other, more general visualizations. I'm also a big math-head, and like to read up on all sorts of unrelated math concepts in my free time. I recently found out that I have an Erdos number of 4, which was fun. 
 
-My other interests include running/lifting, playing video games and watching anime/reading manga.
+My other interests include running/lifting, playing video games, playing the piano and listening to jazz, hip-hop and R&B music.
