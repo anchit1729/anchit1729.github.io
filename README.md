@@ -1,1 +1,1 @@
-Personal website, deployed using the al-folio theme because of course I'd do that.
+Personal website, made using the al-folio theme. Because of course I'd use that.
