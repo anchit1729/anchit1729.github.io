@@ -16,7 +16,15 @@ div,
 li,
 span,
 strong {
+  font-family: ui-sans-serif, system-ui, sans-serif;
   color: var(--global-text-color);
+  line-height: 1.6rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 400;
 }
 
 hr {
@@ -393,14 +401,15 @@ footer.sticky-bottom {
 // Blog
 
 .header-bar {
-  border-bottom: 1px solid var(--global-divider-color);
-  text-align: center;
-  padding-top: 2rem;
-  padding-bottom: 3rem;
+  border-bottom: none;
+  text-align: left;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 
   h1 {
     color: var(--global-theme-color);
-    font-size: 5rem;
+    font-size: 2rem;
+    font-weight: 300;
   }
 }
 
@@ -435,22 +444,18 @@ footer.sticky-bottom {
   padding: 0;
 
   li {
-    border-bottom: 1px solid var(--global-divider-color);
+    border-bottom: none;
     list-style: none;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
 
     .post-meta {
-      color: var(--global-text-color-light);
-      font-size: 0.875rem;
-      margin-bottom: 0;
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
     }
 
     .post-tags {
-      color: var(--global-text-color-light);
-      font-size: 0.875rem;
-      padding-top: 0.25rem;
-      padding-bottom: 0;
+      display: none;
     }
 
     a {
@@ -514,6 +519,10 @@ footer.sticky-bottom {
   }
 
   .card {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+
     img {
       width: 100%;
     }
@@ -552,11 +561,9 @@ footer.sticky-bottom {
   margin-top: 2rem;
 
   h1 {
-    color: var(--global-theme-color);
-    font-size: 2rem;
-    text-align: center;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    font-size: 1.5rem;
+    text-align: left;
+    margin-bottom: 2em;
   }
 
   h2 {
@@ -1033,4 +1040,18 @@ nav[data-toggle="toc"] {
     margin-bottom: 0;
     padding-top: 0.5rem;
   }
+}
+
+.social .contact-icons {
+  font-size: 1.5rem;
+}
+
+.navbar-brand.social {
+  font-size: 1rem;
+}
+
+footer.sticky-bottom {
+  border-top: none;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
