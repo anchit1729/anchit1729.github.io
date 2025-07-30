@@ -414,6 +414,7 @@ footer.sticky-bottom {
 }
 
 .tag-category-list {
+  display: none !important; // remove this if you want to see tag categories for some reason
   border-bottom: 1px solid var(--global-divider-color);
   text-align: center;
   padding-top: 1rem;
@@ -777,6 +778,7 @@ html.transition *:after {
   }
 
   .post-tags {
+    display: none !important; // remove this if you want tags in the future for some reason
     color: var(--global-text-color-light);
     font-size: 0.875rem;
     padding-top: 0.25rem;
