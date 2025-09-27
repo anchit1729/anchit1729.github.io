@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Trying to spend more time building houses and less time painting walls.
+subtitle: Working on computational tools and techniques that engage more than just our sense of sight.
 
 profile:
     align: right
