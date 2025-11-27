@@ -15,7 +15,7 @@ selected_papers: false # includes a list of papers marked as "selected={true}"
 social: false # includes social icons at the bottom of the page
 ---
 
-I am a PhD student at the University of Waterloo, working in Human-Computer Interaction under the supervision of [Profs. Matthew Brehmer](http://mattbrehmer.ca), [Oliver Schneider](http://oliverschneider.ca), and [Daniel Vogel](http://nonsequitoria.com). My work explores the intersection of information visualization and haptic computing, using both information channels to enable multimodal interactions with all sorts of devices, including laptops, mobile devices, tablets and even VR/AR devices. This work often involves the use of techniques from machine learning, computer graphics, and haptics, along with both qualitative and quantitative empirical research and analysis methods common in HCI.
+I am a PhD student at the University of Waterloo, working in Human-Computer Interaction under the supervision of [Profs. Matthew Brehmer](http://mattbrehmer.ca) and [Oliver Schneider](http://oliverschneider.ca). My work explores the intersection of information visualization and haptic computing, using both information channels to enable multimodal interactions with all sorts of devices, including laptops, mobile devices, tablets and even VR/AR devices. This work often involves the use of techniques from machine learning, computer graphics, and haptics, along with both qualitative and quantitative empirical research and analysis methods common in HCI.
 
 As computers become increasingly diverse in form-factor and people work with each other despite differences in preference, access to technology, and even timezones, why limit ourselves to just using passive screens?
 
