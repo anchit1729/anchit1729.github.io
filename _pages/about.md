@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Working on computational tools and techniques that engage more than just our sense of sight.
+subtitle: मानव-सङ्गणक संवाद शास्त्री। Working on computational tools and techniques that engage more than just our sense of sight.
 
 profile:
     align: right
