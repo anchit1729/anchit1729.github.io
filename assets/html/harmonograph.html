@@ -805,20 +805,20 @@
                     state.t = 0;
                 });
 
-            document
-                .getElementById("btn-save")
-                .addEventListener("click", () => {
-                    const modeNames = [
-                        "lissajous",
-                        "brownian",
-                        "lorenz",
-                        "strange",
-                    ];
-                    const link = document.createElement("a");
-                    link.download = `harmonograph_${modeNames[state.curveMode]}_${Date.now()}.png`;
-                    link.href = canvas.toDataURL("image/png");
-                    link.click();
-                });
+            // document
+            //     .getElementById("btn-save")
+            //     .addEventListener("click", () => {
+            //         const modeNames = [
+            //             "lissajous",
+            //             "brownian",
+            //             "lorenz",
+            //             "strange",
+            //         ];
+            //         const link = document.createElement("a");
+            //         link.download = `harmonograph_${modeNames[state.curveMode]}_${Date.now()}.png`;
+            //         link.href = canvas.toDataURL("image/png");
+            //         link.click();
+            //     });
 
             // ════════════════════════════════════════════════════════════
             //  GO
