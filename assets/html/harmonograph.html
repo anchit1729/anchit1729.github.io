@@ -597,9 +597,9 @@
             </div>
 
             <!-- Glow -->
-            <div class="section">
-                <div class="section-label">Rendering</div>
-                <div class="param-row">
+            <!-- <div class="section"> -->
+            <!-- <div class="section-label">Rendering</div> -->
+            <!-- <div class="param-row">
                     <span class="param-label">Glow</span>
                     <input
                         type="range"
@@ -609,8 +609,8 @@
                         step="0.001"
                         value="0.006" />
                     <span class="param-val" id="glow-val">0.006</span>
-                </div>
-                <div class="param-row">
+                </div> -->
+            <!-- <div class="param-row">
                     <span class="param-label">Persistence</span>
                     <input
                         type="range"
@@ -620,8 +620,8 @@
                         step="0.005"
                         value="0.92" />
                     <span class="param-val" id="persist-val">0.920</span>
-                </div>
-                <div class="param-row">
+                </div> -->
+            <!-- <div class="param-row">
                     <span class="param-label">Brightness</span>
                     <input
                         type="range"
@@ -631,20 +631,20 @@
                         step="0.1"
                         value="1.8" />
                     <span class="param-val" id="bright-val">1.8</span>
-                </div>
-            </div>
+                </div> -->
+            <!-- </div> -->
 
             <!-- Presets -->
-            <div class="section">
+            <!-- <div class="section">
                 <div class="section-label">Presets</div>
                 <div class="preset-grid" id="preset-grid"></div>
-            </div>
+            </div> -->
 
-            <div class="action-row">
+            <!-- <div class="action-row">
                 <button class="action-btn primary" id="btn-play">PAUSE</button>
                 <button class="action-btn" id="btn-reset">RESET</button>
                 <button class="action-btn" id="btn-save">SAVE</button>
-            </div>
+            </div> -->
         </div>
 
         <script>
@@ -1668,93 +1668,93 @@ void main() {
             });
 
             // Presets
-            const presetGrid = document.getElementById("preset-grid");
-            PRESETS.forEach((p) => {
-                const btn = document.createElement("button");
-                btn.className = "preset-btn";
-                btn.innerHTML = `<span class="preset-tag tag-${p.tag}">${p.tag}</span><span class="preset-name">${p.name}</span><span class="preset-ratio">${p.ratio[0]}:${p.ratio[1]}</span>`;
-                btn.addEventListener("click", () => {
-                    state.curveMode = p.mode;
-                    state.fx = p.ratio[0];
-                    state.fy = p.ratio[1];
-                    state.phase = p.phase;
-                    state.d1 = p.d1;
-                    state.d2 = p.d2;
-                    state.drift = p.drift;
-                    state.noiseAmp = p.noiseAmp;
-                    document.getElementById("fx-input").value = p.ratio[0];
-                    document.getElementById("fy-input").value = p.ratio[1];
-                    document.getElementById("phase").value = p.phase;
-                    document.getElementById("d1").value = p.d1;
-                    document.getElementById("d2").value = p.d2;
-                    document.getElementById("drift").value = p.drift;
-                    document.getElementById("noiseAmp").value = p.noiseAmp;
-                    document.getElementById("phase-val").textContent =
-                        (p.phase / Math.PI).toFixed(2) + "π";
-                    document.getElementById("d1-val").textContent =
-                        p.d1.toFixed(4);
-                    document.getElementById("d2-val").textContent =
-                        p.d2.toFixed(4);
-                    document.getElementById("drift-val").textContent =
-                        p.drift.toFixed(4);
-                    document.getElementById("noiseAmp-val").textContent =
-                        p.noiseAmp.toFixed(3);
-                    document
-                        .querySelectorAll(".ratio-btn")
-                        .forEach((x) => x.classList.remove("active"));
-                    document
-                        .querySelectorAll(".mode-btn")
-                        .forEach((x) =>
-                            x.classList.toggle(
-                                "active",
-                                parseInt(x.dataset.mode) === p.mode,
-                            ),
-                        );
-                    document.getElementById("mode-desc").textContent =
-                        MODE_DESCS[p.mode];
-                    if (p.mode === 4) {
-                        walkX = [0];
-                        walkY = [0];
-                        walkSeed = mulberry32(Date.now() | 0);
-                    }
-                    clearFB(fbA);
-                    clearFB(fbB);
-                    state.t = 0;
-                });
-                presetGrid.appendChild(btn);
-            });
+            // const presetGrid = document.getElementById("preset-grid");
+            // PRESETS.forEach((p) => {
+            //     const btn = document.createElement("button");
+            //     btn.className = "preset-btn";
+            //     btn.innerHTML = `<span class="preset-tag tag-${p.tag}">${p.tag}</span><span class="preset-name">${p.name}</span><span class="preset-ratio">${p.ratio[0]}:${p.ratio[1]}</span>`;
+            //     btn.addEventListener("click", () => {
+            //         state.curveMode = p.mode;
+            //         state.fx = p.ratio[0];
+            //         state.fy = p.ratio[1];
+            //         state.phase = p.phase;
+            //         state.d1 = p.d1;
+            //         state.d2 = p.d2;
+            //         state.drift = p.drift;
+            //         state.noiseAmp = p.noiseAmp;
+            //         document.getElementById("fx-input").value = p.ratio[0];
+            //         document.getElementById("fy-input").value = p.ratio[1];
+            //         document.getElementById("phase").value = p.phase;
+            //         document.getElementById("d1").value = p.d1;
+            //         document.getElementById("d2").value = p.d2;
+            //         document.getElementById("drift").value = p.drift;
+            //         document.getElementById("noiseAmp").value = p.noiseAmp;
+            //         document.getElementById("phase-val").textContent =
+            //             (p.phase / Math.PI).toFixed(2) + "π";
+            //         document.getElementById("d1-val").textContent =
+            //             p.d1.toFixed(4);
+            //         document.getElementById("d2-val").textContent =
+            //             p.d2.toFixed(4);
+            //         document.getElementById("drift-val").textContent =
+            //             p.drift.toFixed(4);
+            //         document.getElementById("noiseAmp-val").textContent =
+            //             p.noiseAmp.toFixed(3);
+            //         document
+            //             .querySelectorAll(".ratio-btn")
+            //             .forEach((x) => x.classList.remove("active"));
+            //         document
+            //             .querySelectorAll(".mode-btn")
+            //             .forEach((x) =>
+            //                 x.classList.toggle(
+            //                     "active",
+            //                     parseInt(x.dataset.mode) === p.mode,
+            //                 ),
+            //             );
+            //         document.getElementById("mode-desc").textContent =
+            //             MODE_DESCS[p.mode];
+            //         if (p.mode === 4) {
+            //             walkX = [0];
+            //             walkY = [0];
+            //             walkSeed = mulberry32(Date.now() | 0);
+            //         }
+            //         clearFB(fbA);
+            //         clearFB(fbB);
+            //         state.t = 0;
+            //     });
+            //     presetGrid.appendChild(btn);
+            // });
 
             // Play/Pause
-            document
-                .getElementById("btn-play")
-                .addEventListener("click", () => {
-                    state.paused = !state.paused;
-                    document.getElementById("btn-play").textContent =
-                        state.paused ? "PLAY" : "PAUSE";
-                    document.getElementById("status-dot").className =
-                        "status-dot" + (state.paused ? " paused" : "");
-                    document.getElementById("status-text").textContent =
-                        state.paused ? "PAUSED" : "RENDERING";
-                });
+            // document
+            //     .getElementById("btn-play")
+            //     .addEventListener("click", () => {
+            //         state.paused = !state.paused;
+            //         document.getElementById("btn-play").textContent =
+            //             state.paused ? "PLAY" : "PAUSE";
+            //         document.getElementById("status-dot").className =
+            //             "status-dot" + (state.paused ? " paused" : "");
+            //         document.getElementById("status-text").textContent =
+            //             state.paused ? "PAUSED" : "RENDERING";
+            //     });
 
-            // Reset
-            document
-                .getElementById("btn-reset")
-                .addEventListener("click", () => {
-                    state.t = 0;
-                    clearFB(fbA);
-                    clearFB(fbB);
-                });
+            // // Reset
+            // document
+            //     .getElementById("btn-reset")
+            //     .addEventListener("click", () => {
+            //         state.t = 0;
+            //         clearFB(fbA);
+            //         clearFB(fbB);
+            //     });
 
-            // Save
-            document
-                .getElementById("btn-save")
-                .addEventListener("click", () => {
-                    const link = document.createElement("a");
-                    link.download = `harmonograph_${state.fx}_${state.fy}_${Date.now()}.png`;
-                    link.href = canvas.toDataURL("image/png");
-                    link.click();
-                });
+            // // Save
+            // document
+            //     .getElementById("btn-save")
+            //     .addEventListener("click", () => {
+            //         const link = document.createElement("a");
+            //         link.download = `harmonograph_${state.fx}_${state.fy}_${Date.now()}.png`;
+            //         link.href = canvas.toDataURL("image/png");
+            //         link.click();
+            //     });
 
             // ════════════════════════════════════════════════════════════
             //  GO
