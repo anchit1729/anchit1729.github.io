@@ -1724,37 +1724,37 @@ void main() {
             //     presetGrid.appendChild(btn);
             // });
 
-            // Play/Pause
-            document
-                .getElementById("btn-play")
-                .addEventListener("click", () => {
-                    state.paused = !state.paused;
-                    document.getElementById("btn-play").textContent =
-                        state.paused ? "PLAY" : "PAUSE";
-                    document.getElementById("status-dot").className =
-                        "status-dot" + (state.paused ? " paused" : "");
-                    document.getElementById("status-text").textContent =
-                        state.paused ? "PAUSED" : "RENDERING";
-                });
+            // // Play/Pause
+            // document
+            //     .getElementById("btn-play")
+            //     .addEventListener("click", () => {
+            //         state.paused = !state.paused;
+            //         document.getElementById("btn-play").textContent =
+            //             state.paused ? "PLAY" : "PAUSE";
+            //         document.getElementById("status-dot").className =
+            //             "status-dot" + (state.paused ? " paused" : "");
+            //         document.getElementById("status-text").textContent =
+            //             state.paused ? "PAUSED" : "RENDERING";
+            //     });
 
-            // Reset
-            document
-                .getElementById("btn-reset")
-                .addEventListener("click", () => {
-                    state.t = 0;
-                    clearFB(fbA);
-                    clearFB(fbB);
-                });
+            // // Reset
+            // document
+            //     .getElementById("btn-reset")
+            //     .addEventListener("click", () => {
+            //         state.t = 0;
+            //         clearFB(fbA);
+            //         clearFB(fbB);
+            //     });
 
-            // Save
-            document
-                .getElementById("btn-save")
-                .addEventListener("click", () => {
-                    const link = document.createElement("a");
-                    link.download = `harmonograph_${state.fx}_${state.fy}_${Date.now()}.png`;
-                    link.href = canvas.toDataURL("image/png");
-                    link.click();
-                });
+            // // Save
+            // document
+            //     .getElementById("btn-save")
+            //     .addEventListener("click", () => {
+            //         const link = document.createElement("a");
+            //         link.download = `harmonograph_${state.fx}_${state.fy}_${Date.now()}.png`;
+            //         link.href = canvas.toDataURL("image/png");
+            //         link.click();
+            //     });
 
             // ════════════════════════════════════════════════════════════
             //  GO
