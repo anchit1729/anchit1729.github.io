@@ -1,0 +1,1765 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Harmonograph Explorer</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap"
+            rel="stylesheet" />
+        <style>
+            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+            :root {
+              --bg: #03050a;
+              --panel: #070c14;
+              --border: #1a2a3a;
+              --glow: #00e5ff;
+              --glow2: #ff6b6b;
+              --glow3: #a8ff78;
+              --text: #8ab4cc;
+              --text-dim: #3a5a72;
+              --accent: #00e5ff;
+              --panel-w: 280px;
+            }
+
+            body {
+              background: var(--bg);
+              color: var(--text);
+              font-family: 'Share Tech Mono', monospace;
+              display: flex;
+              height: 100vh;
+              overflow: hidden;
+            }
+
+            /* ── CANVAS AREA ── */
+            #canvas-wrap {
+              flex: 1;
+              position: relative;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+
+            canvas#gl {
+              display: block;
+            }
+
+            /* scanline overlay */
+            #canvas-wrap::after {
+              content: '';
+              position: absolute;
+              inset: 0;
+              background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.08) 2px,
+                rgba(0,0,0,0.08) 4px
+              );
+              pointer-events: none;
+              z-index: 2;
+            }
+
+            /* corner brackets */
+            #canvas-wrap::before {
+              content: '';
+              position: absolute;
+              inset: 20px;
+              border: 1px solid var(--border);
+              pointer-events: none;
+              z-index: 3;
+              box-shadow:
+                inset 0 0 60px rgba(0,229,255,0.03),
+                0 0 60px rgba(0,229,255,0.03);
+            }
+
+            .corner {
+              position: absolute;
+              width: 16px; height: 16px;
+              z-index: 4;
+              pointer-events: none;
+            }
+            .corner::before, .corner::after {
+              content: '';
+              position: absolute;
+              background: var(--accent);
+            }
+            .corner.tl { top: 20px; left: 20px; }
+            .corner.tl::before { width: 100%; height: 1px; top: 0; left: 0; }
+            .corner.tl::after  { width: 1px; height: 100%; top: 0; left: 0; }
+            .corner.tr { top: 20px; right: 20px; }
+            .corner.tr::before { width: 100%; height: 1px; top: 0; right: 0; left: 0; }
+            .corner.tr::after  { width: 1px; height: 100%; top: 0; right: 0; }
+            .corner.bl { bottom: 20px; left: 20px; }
+            .corner.bl::before { width: 100%; height: 1px; bottom: 0; left: 0; }
+            .corner.bl::after  { width: 1px; height: 100%; bottom: 0; left: 0; }
+            .corner.br { bottom: 20px; right: 20px; }
+            .corner.br::before { width: 100%; height: 1px; bottom: 0; right: 0; left: 0; }
+            .corner.br::after  { width: 1px; height: 100%; bottom: 0; right: 0; }
+
+            /* freq display */
+            #ratio-display {
+              position: absolute;
+              bottom: 36px;
+              left: 50%;
+              transform: translateX(-50%);
+              z-index: 5;
+              font-size: 11px;
+              letter-spacing: 0.2em;
+              color: var(--text-dim);
+              pointer-events: none;
+            }
+            #ratio-display span { color: var(--accent); }
+
+            /* ── PANEL ── */
+            #panel {
+              width: var(--panel-w);
+              background: var(--panel);
+              border-left: 1px solid var(--border);
+              display: flex;
+              flex-direction: column;
+              overflow-y: auto;
+              z-index: 10;
+            }
+
+            #panel::-webkit-scrollbar { width: 3px; }
+            #panel::-webkit-scrollbar-thumb { background: var(--border); }
+
+            .panel-header {
+              padding: 24px 20px 16px;
+              border-bottom: 1px solid var(--border);
+            }
+
+            .panel-title {
+              font-family: 'Cormorant Garamond', serif;
+              font-size: 22px;
+              font-weight: 300;
+              color: #dce8f0;
+              letter-spacing: 0.05em;
+              line-height: 1.2;
+            }
+            .panel-title em {
+              font-style: italic;
+              color: var(--accent);
+            }
+            .panel-sub {
+              margin-top: 4px;
+              font-size: 9px;
+              letter-spacing: 0.25em;
+              color: var(--text-dim);
+              text-transform: uppercase;
+            }
+
+            .section {
+              padding: 16px 20px;
+              border-bottom: 1px solid var(--border);
+            }
+
+            .section-label {
+              font-size: 9px;
+              letter-spacing: 0.3em;
+              color: var(--text-dim);
+              text-transform: uppercase;
+              margin-bottom: 14px;
+            }
+
+            /* Frequency ratio grid */
+            .ratio-grid {
+              display: grid;
+              grid-template-columns: repeat(5, 1fr);
+              gap: 5px;
+              margin-bottom: 14px;
+            }
+
+            .ratio-btn {
+              background: transparent;
+              border: 1px solid var(--border);
+              color: var(--text-dim);
+              font-family: 'Share Tech Mono', monospace;
+              font-size: 10px;
+              padding: 6px 2px;
+              cursor: pointer;
+              text-align: center;
+              transition: all 0.15s;
+              letter-spacing: 0.05em;
+            }
+            .ratio-btn:hover {
+              border-color: var(--accent);
+              color: var(--accent);
+              background: rgba(0,229,255,0.05);
+            }
+            .ratio-btn.active {
+              border-color: var(--accent);
+              color: var(--bg);
+              background: var(--accent);
+              box-shadow: 0 0 12px rgba(0,229,255,0.4);
+            }
+
+            /* sliders */
+            .param-row {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 12px;
+            }
+            .param-label {
+              font-size: 9px;
+              letter-spacing: 0.15em;
+              color: var(--text-dim);
+              text-transform: uppercase;
+              width: 80px;
+              flex-shrink: 0;
+            }
+            .param-val {
+              font-size: 11px;
+              color: var(--accent);
+              width: 38px;
+              text-align: right;
+              flex-shrink: 0;
+            }
+
+            input[type=range] {
+              -webkit-appearance: none;
+              flex: 1;
+              height: 2px;
+              background: var(--border);
+              outline: none;
+              margin: 0 10px;
+              cursor: pointer;
+              position: relative;
+            }
+            input[type=range]::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              width: 10px; height: 10px;
+              background: var(--accent);
+              border-radius: 50%;
+              box-shadow: 0 0 8px rgba(0,229,255,0.7);
+              cursor: pointer;
+            }
+            input[type=range]::-moz-range-thumb {
+              width: 10px; height: 10px;
+              background: var(--accent);
+              border: none;
+              border-radius: 50%;
+              box-shadow: 0 0 8px rgba(0,229,255,0.7);
+              cursor: pointer;
+            }
+
+            /* color mode */
+            .color-row {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 5px;
+            }
+            .color-btn {
+              border: 1px solid var(--border);
+              padding: 8px 4px;
+              font-family: 'Share Tech Mono', monospace;
+              font-size: 9px;
+              letter-spacing: 0.1em;
+              cursor: pointer;
+              text-align: center;
+              transition: all 0.15s;
+              background: transparent;
+              text-transform: uppercase;
+            }
+            .color-btn.active { border-color: currentColor; box-shadow: 0 0 10px currentColor; }
+            .color-btn:hover { opacity: 0.8; }
+
+            /* mode selector */
+            .mode-grid {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 5px;
+              margin-bottom: 10px;
+            }
+            .mode-btn {
+              background: transparent;
+              border: 1px solid var(--border);
+              color: var(--text-dim);
+              font-family: 'Share Tech Mono', monospace;
+              font-size: 8px;
+              padding: 7px 4px;
+              cursor: pointer;
+              text-align: center;
+              transition: all 0.15s;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+            }
+            .mode-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,0.05); }
+            .mode-btn.active { border-color: var(--glow2); color: var(--glow2); background: rgba(255,107,107,0.08); box-shadow: 0 0 10px rgba(255,107,107,0.3); }
+            .mode-desc {
+              font-size: 8px;
+              color: var(--text-dim);
+              letter-spacing: 0.08em;
+              line-height: 1.5;
+              min-height: 24px;
+              font-style: italic;
+            }
+
+            /* preset tags */
+            .preset-tag {
+              font-size: 7px;
+              letter-spacing: 0.1em;
+              padding: 1px 4px;
+              border: 1px solid;
+              border-radius: 2px;
+              margin-bottom: 3px;
+              display: inline-block;
+              text-transform: uppercase;
+            }
+            .tag-liss,.tag-harm,.tag-spin,.tag-butt,.tag-pend,.tag-cath { color:#3a5a72; border-color:#1a2a3a; }
+            .tag-brow,.tag-jit { color:#a78bfa; border-color:#4a2a7a; }
+            .tag-lorz,.tag-turb { color:#ff6b6b; border-color:#7a2a2a; }
+            .tag-stng,.tag-irr  { color:#ffd700; border-color:#7a6a00; }
+            .tag-diff { color:#a8ff78; border-color:#3a7a28; }
+            .tag-bif  { color:#ffb347; border-color:#7a5a20; }
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 6px;
+            }
+            .preset-btn {
+              background: transparent;
+              border: 1px solid var(--border);
+              color: var(--text-dim);
+              font-family: 'Share Tech Mono', monospace;
+              font-size: 9px;
+              letter-spacing: 0.1em;
+              padding: 8px;
+              cursor: pointer;
+              text-align: left;
+              transition: all 0.15s;
+              text-transform: uppercase;
+            }
+            .preset-btn:hover {
+              border-color: var(--text);
+              color: var(--text);
+              background: rgba(255,255,255,0.03);
+            }
+            .preset-name { display: block; margin-bottom: 2px; color: inherit; }
+            .preset-ratio { font-size: 8px; color: var(--text-dim); }
+
+            /* action btns */
+            .action-row {
+              display: flex;
+              gap: 8px;
+              padding: 16px 20px;
+              border-top: 1px solid var(--border);
+              margin-top: auto;
+            }
+            .action-btn {
+              flex: 1;
+              background: transparent;
+              border: 1px solid var(--border);
+              color: var(--text);
+              font-family: 'Share Tech Mono', monospace;
+              font-size: 9px;
+              letter-spacing: 0.2em;
+              padding: 10px;
+              cursor: pointer;
+              text-transform: uppercase;
+              transition: all 0.15s;
+            }
+            .action-btn:hover {
+              border-color: var(--accent);
+              color: var(--accent);
+              background: rgba(0,229,255,0.05);
+            }
+            .action-btn.primary {
+              border-color: var(--accent);
+              color: var(--accent);
+            }
+            .action-btn.primary:hover {
+              background: var(--accent);
+              color: var(--bg);
+              box-shadow: 0 0 16px rgba(0,229,255,0.4);
+            }
+
+            /* status indicator */
+            .status-dot {
+              display: inline-block;
+              width: 6px; height: 6px;
+              border-radius: 50%;
+              background: var(--glow3);
+              box-shadow: 0 0 8px var(--glow3);
+              margin-right: 6px;
+              animation: pulse 2s ease-in-out infinite;
+            }
+            .status-dot.paused { background: var(--glow2); box-shadow: 0 0 8px var(--glow2); animation: none; }
+            @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+            .status-line {
+              font-size: 9px;
+              color: var(--text-dim);
+              padding: 10px 20px 0;
+              letter-spacing: 0.1em;
+            }
+
+            /* custom freq inputs */
+            .freq-inputs {
+              display: flex;
+              gap: 8px;
+              align-items: center;
+            }
+            .freq-input {
+              flex: 1;
+              background: transparent;
+              border: 1px solid var(--border);
+              color: var(--text);
+              font-family: 'Share Tech Mono', monospace;
+              font-size: 12px;
+              padding: 6px 8px;
+              text-align: center;
+              outline: none;
+              transition: border-color 0.15s;
+            }
+            .freq-input:focus { border-color: var(--accent); }
+            .freq-sep { color: var(--text-dim); font-size: 14px; }
+        </style>
+    </head>
+    <body>
+        <!-- Canvas -->
+        <div id="canvas-wrap">
+            <canvas id="gl"></canvas>
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <div id="ratio-display">
+                fx <span id="disp-fx">3</span> · fy
+                <span id="disp-fy">2</span> · φ
+                <span id="disp-phase">0.00</span>π · mode
+                <span id="disp-decay">LISS</span>
+            </div>
+        </div>
+
+        <!-- Panel -->
+        <div id="panel">
+            <div class="panel-header">
+                <div class="panel-title"><em>Harmono</em>graph</div>
+                <div class="panel-sub">
+                    Lissajous · Phase Space · Oscilloscope
+                </div>
+            </div>
+
+            <div class="status-line">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">RENDERING</span>
+            </div>
+
+            <!-- Curve Mode -->
+            <div class="section">
+                <div class="section-label">Curve Mode</div>
+                <div class="mode-grid" id="mode-grid">
+                    <button class="mode-btn active" data-mode="0">
+                        Lissajous
+                    </button>
+                    <button class="mode-btn" data-mode="1">Brownian</button>
+                    <button class="mode-btn" data-mode="2">Lorenz</button>
+                    <button class="mode-btn" data-mode="3">Strange</button>
+                    <button class="mode-btn" data-mode="4">Diffusion</button>
+                    <button class="mode-btn" data-mode="5">Bifurcation</button>
+                </div>
+                <div class="mode-desc" id="mode-desc">
+                    Deterministic Lissajous figures with optional harmonograph
+                    decay
+                </div>
+            </div>
+
+            <!-- Frequency Ratios -->
+            <div class="section">
+                <div class="section-label">Frequency Ratio fx : fy</div>
+                <div class="ratio-grid" id="ratio-grid"></div>
+                <div class="freq-inputs">
+                    <input
+                        class="freq-input"
+                        id="fx-input"
+                        type="number"
+                        min="1"
+                        max="20"
+                        step="1"
+                        value="3" />
+                    <span class="freq-sep">:</span>
+                    <input
+                        class="freq-input"
+                        id="fy-input"
+                        type="number"
+                        min="1"
+                        max="20"
+                        step="1"
+                        value="2" />
+                </div>
+            </div>
+
+            <!-- Phase -->
+            <div class="section">
+                <div class="section-label">Phase, Drift & Noise</div>
+                <div class="param-row">
+                    <span class="param-label">Phase δ</span>
+                    <input
+                        type="range"
+                        id="phase"
+                        min="0"
+                        max="6.2832"
+                        step="0.01"
+                        value="0.7854" />
+                    <span class="param-val" id="phase-val">0.25π</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">Drift rate</span>
+                    <input
+                        type="range"
+                        id="drift"
+                        min="0"
+                        max="0.005"
+                        step="0.0001"
+                        value="0.0005" />
+                    <span class="param-val" id="drift-val">0.0005</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">Noise amp</span>
+                    <input
+                        type="range"
+                        id="noiseAmp"
+                        min="0"
+                        max="0.1"
+                        step="0.001"
+                        value="0.012" />
+                    <span class="param-val" id="noiseAmp-val">0.012</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">Noise spd</span>
+                    <input
+                        type="range"
+                        id="noiseSpeed"
+                        min="0.05"
+                        max="4.0"
+                        step="0.05"
+                        value="0.8" />
+                    <span class="param-val" id="noiseSpeed-val">0.80</span>
+                </div>
+            </div>
+
+            <!-- Decay -->
+            <div class="section">
+                <div class="section-label">Harmonograph</div>
+                <div class="param-row">
+                    <span class="param-label">Decay d₁</span>
+                    <input
+                        type="range"
+                        id="d1"
+                        min="0"
+                        max="0.004"
+                        step="0.00005"
+                        value="0.0008" />
+                    <span class="param-val" id="d1-val">0.0008</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">Decay d₂</span>
+                    <input
+                        type="range"
+                        id="d2"
+                        min="0"
+                        max="0.004"
+                        step="0.00005"
+                        value="0.0010" />
+                    <span class="param-val" id="d2-val">0.0010</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">Iterations</span>
+                    <input
+                        type="range"
+                        id="iters"
+                        min="2000"
+                        max="120000"
+                        step="1000"
+                        value="40000" />
+                    <span class="param-val" id="iters-val">40k</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">Speed</span>
+                    <input
+                        type="range"
+                        id="speed"
+                        min="0.001"
+                        max="0.08"
+                        step="0.001"
+                        value="0.02" />
+                    <span class="param-val" id="speed-val">0.020</span>
+                </div>
+            </div>
+
+            <!-- Color -->
+            <div class="section">
+                <div class="section-label">Palette</div>
+                <div class="color-row" id="color-row"></div>
+            </div>
+
+            <!-- Glow -->
+            <div class="section">
+                <div class="section-label">Rendering</div>
+                <div class="param-row">
+                    <span class="param-label">Glow</span>
+                    <input
+                        type="range"
+                        id="glow"
+                        min="0.001"
+                        max="0.025"
+                        step="0.001"
+                        value="0.006" />
+                    <span class="param-val" id="glow-val">0.006</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">Persistence</span>
+                    <input
+                        type="range"
+                        id="persist"
+                        min="0.80"
+                        max="0.99"
+                        step="0.005"
+                        value="0.92" />
+                    <span class="param-val" id="persist-val">0.920</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">Brightness</span>
+                    <input
+                        type="range"
+                        id="bright"
+                        min="0.5"
+                        max="4.0"
+                        step="0.1"
+                        value="1.8" />
+                    <span class="param-val" id="bright-val">1.8</span>
+                </div>
+            </div>
+
+            <!-- Presets -->
+            <div class="section">
+                <div class="section-label">Presets</div>
+                <div class="preset-grid" id="preset-grid"></div>
+            </div>
+
+            <div class="action-row">
+                <button class="action-btn primary" id="btn-play">PAUSE</button>
+                <button class="action-btn" id="btn-reset">RESET</button>
+                <button class="action-btn" id="btn-save">SAVE</button>
+            </div>
+        </div>
+
+        <script>
+            // ════════════════════════════════════════════════════════════
+            //  STATE
+            // ════════════════════════════════════════════════════════════
+            const state = {
+                fx: 3,
+                fy: 2,
+                phase: Math.PI / 4,
+                drift: 0.0005,
+                d1: 0.0008,
+                d2: 0.001,
+                iters: 40000,
+                speed: 0.02,
+                glowR: 0.006,
+                persist: 0.92,
+                bright: 1.8,
+                t: 0,
+                paused: false,
+                colorMode: 0,
+                curveMode: 0, // 0=lissajous, 1=brownian, 2=lorenz, 3=strange, 4=diffusion, 5=bifurcation
+                noiseAmp: 0.012,
+                noiseSpeed: 0.8,
+            };
+
+            // ── Seeded PRNG (Mulberry32) for reproducible noise ──
+            function mulberry32(seed) {
+                return function () {
+                    seed |= 0;
+                    seed = (seed + 0x6d2b79f5) | 0;
+                    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+                    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+                    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+                };
+            }
+
+            // ── Smooth noise via seeded lookup table ──
+            function makeNoise1D(seed, size = 4096) {
+                const rng = mulberry32(seed);
+                const table = new Float32Array(size);
+                for (let i = 0; i < size; i++) table[i] = rng() * 2 - 1;
+                return (t) => {
+                    const idx = (t * 0.1) % size;
+                    const i0 = Math.floor(idx) % size;
+                    const i1 = (i0 + 1) % size;
+                    const f = idx - Math.floor(idx);
+                    // cubic hermite
+                    const a = table[i0],
+                        b = table[i1];
+                    return a + (b - a) * (3 * f * f - 2 * f * f * f);
+                };
+            }
+            const noise1 = makeNoise1D(42);
+            const noise2 = makeNoise1D(137);
+            const noise3 = makeNoise1D(271);
+            const noise4 = makeNoise1D(999);
+
+            // ── Lorenz attractor (pre-integrated, normalized) ──
+            let lorenzX = [],
+                lorenzY = [];
+            (function () {
+                let x = 0.1,
+                    y = 0,
+                    z = 0;
+                const s = 10,
+                    r = 28,
+                    b = 8 / 3,
+                    dt = 0.005;
+                // burn-in
+                for (let i = 0; i < 2000; i++) {
+                    const dx = s * (y - x),
+                        dy = x * (r - z) - y,
+                        dz = x * y - b * z;
+                    x += dx * dt;
+                    y += dy * dt;
+                    z += dz * dt;
+                }
+                let minX = Infinity,
+                    maxX = -Infinity,
+                    minY = Infinity,
+                    maxY = -Infinity;
+                const tmpX = [],
+                    tmpY = [];
+                for (let i = 0; i < 120000; i++) {
+                    const dx = s * (y - x),
+                        dy = x * (r - z) - y,
+                        dz = x * y - b * z;
+                    x += dx * dt;
+                    y += dy * dt;
+                    z += dz * dt;
+                    tmpX.push(x);
+                    tmpY.push(z); // project onto xz plane
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (z < minY) minY = z;
+                    if (z > maxY) maxY = z;
+                }
+                const scX = 2 / (maxX - minX),
+                    scY = 2 / (maxY - minY);
+                const midX = (minX + maxX) / 2,
+                    midY = (minY + maxY) / 2;
+                for (let i = 0; i < tmpX.length; i++) {
+                    lorenzX.push((tmpX[i] - midX) * scX * 0.9);
+                    lorenzY.push((tmpY[i] - midY) * scY * 0.9);
+                }
+            })();
+
+            // ── Diffusion-limited random walk state ──
+            let walkX = [0],
+                walkY = [0];
+            let walkSeed = mulberry32(Date.now() | 0);
+            function stepWalk(n) {
+                while (walkX.length < n) {
+                    const last = walkX.length - 1;
+                    const angle = walkSeed() * Math.PI * 2;
+                    const step = 0.008 + walkSeed() * 0.008;
+                    const nx = walkX[last] + Math.cos(angle) * step;
+                    const ny = walkY[last] + Math.sin(angle) * step;
+                    // soft boundary
+                    const r = Math.sqrt(nx * nx + ny * ny);
+                    walkX.push(r < 0.95 ? nx : walkX[last] * 0.98);
+                    walkY.push(r < 0.95 ? ny : walkY[last] * 0.98);
+                }
+            }
+
+            // ── Bifurcation / logistic map curve ──
+            function buildBifurcation(n) {
+                // Scan r ∈ [2.5,4.0], for each r iterate logistic map, take last 32 values
+                // Map (r, x) → (screen x, screen y)
+                const pts = [];
+                const steps = Math.min(n, N);
+                const rMin = 2.8,
+                    rMax = 4.0;
+                const rCount = Math.floor(steps / 64);
+                for (let ri = 0; ri < rCount && pts.length < steps - 1; ri++) {
+                    const r = rMin + ((rMax - rMin) * ri) / rCount;
+                    let x = 0.5 + (mulberry32(ri | 0)() * 0.01 - 0.005);
+                    // burn in
+                    for (let k = 0; k < 200; k++) x = r * x * (1 - x);
+                    // collect
+                    for (let k = 0; k < 64 && pts.length < steps - 1; k++) {
+                        x = r * x * (1 - x);
+                        pts.push([
+                            ((r - rMin) / (rMax - rMin)) * 2 - 1,
+                            x * 2 - 1,
+                        ]);
+                    }
+                }
+                return pts;
+            }
+
+            const RATIOS = [
+                [1, 1],
+                [2, 1],
+                [3, 2],
+                [4, 3],
+                [5, 4],
+                [5, 3],
+                [6, 5],
+                [7, 4],
+                [7, 5],
+                [7, 6],
+                [3, 1],
+                [4, 1],
+                [5, 1],
+                [5, 2],
+                [8, 5],
+                [9, 8],
+                [11, 8],
+                [16, 9],
+                [2, 3],
+                [3, 4],
+            ];
+
+            const PALETTES = [
+                {
+                    name: "Cyan",
+                    label: "CYN",
+                    fn: (t, a) => [0, a * 0.9 + t * 0.1, a, a * 0.5],
+                },
+                {
+                    name: "Amber",
+                    label: "AMB",
+                    fn: (t, a) => [a, a * 0.55, 0, a * 0.5],
+                },
+                {
+                    name: "Violet",
+                    label: "VIO",
+                    fn: (t, a) => [a * 0.7, 0, a, a * 0.5],
+                },
+                {
+                    name: "Aurora",
+                    label: "AUR",
+                    fn: (t, a) => [
+                        a * 0.3 + t * 0.7,
+                        a,
+                        a * 0.4 + t * 0.6,
+                        a * 0.5,
+                    ],
+                },
+                {
+                    name: "Plasma",
+                    label: "PLA",
+                    fn: (t, a) => [a, a * (1 - t), a * t, a * 0.5],
+                },
+                {
+                    name: "Gold",
+                    label: "GLD",
+                    fn: (t, a) => [a, a * 0.84, a * 0.1 + t * 0.2, a * 0.5],
+                },
+                {
+                    name: "Ice",
+                    label: "ICE",
+                    fn: (t, a) => [a * 0.4 + t * 0.2, a * 0.8, a, a * 0.5],
+                },
+                {
+                    name: "Ember",
+                    label: "EMB",
+                    fn: (t, a) => [a, a * (0.2 + t * 0.5), 0, a * 0.5],
+                },
+            ];
+            const P_COLORS = [
+                "#00e5ff",
+                "#ffb347",
+                "#a78bfa",
+                "#a8ff78",
+                "#ff6b6b",
+                "#ffd700",
+                "#67e8f9",
+                "#ff4500",
+            ];
+
+            const PRESETS = [
+                {
+                    name: "Lissajous",
+                    mode: 0,
+                    ratio: [3, 2],
+                    phase: 1.57,
+                    d1: 0,
+                    d2: 0,
+                    drift: 0,
+                    noiseAmp: 0.012,
+                    tag: "liss",
+                },
+                {
+                    name: "Harmonograph",
+                    mode: 0,
+                    ratio: [3, 2],
+                    phase: 1.57,
+                    d1: 0.0008,
+                    d2: 0.001,
+                    drift: 0.0002,
+                    noiseAmp: 0.012,
+                    tag: "harm",
+                },
+                {
+                    name: "Spirograph",
+                    mode: 0,
+                    ratio: [7, 5],
+                    phase: 0.5,
+                    d1: 0.0003,
+                    d2: 0.0005,
+                    drift: 0.0003,
+                    noiseAmp: 0.012,
+                    tag: "spin",
+                },
+                {
+                    name: "Butterfly",
+                    mode: 0,
+                    ratio: [5, 4],
+                    phase: 2.0,
+                    d1: 0.0006,
+                    d2: 0.0008,
+                    drift: 0.0001,
+                    noiseAmp: 0.012,
+                    tag: "butt",
+                },
+                {
+                    name: "Pendulum",
+                    mode: 0,
+                    ratio: [2, 1],
+                    phase: 0.785,
+                    d1: 0.001,
+                    d2: 0.0015,
+                    drift: 0,
+                    noiseAmp: 0.012,
+                    tag: "pend",
+                },
+                {
+                    name: "Cathedral",
+                    mode: 0,
+                    ratio: [9, 8],
+                    phase: 1.2,
+                    d1: 0.0002,
+                    d2: 0.0003,
+                    drift: 0.0001,
+                    noiseAmp: 0.012,
+                    tag: "cath",
+                },
+                // stochastic
+                {
+                    name: "Drunk Cosmo",
+                    mode: 1,
+                    ratio: [3, 2],
+                    phase: 1.57,
+                    d1: 0.0005,
+                    d2: 0.0006,
+                    drift: 0.0004,
+                    noiseAmp: 0.025,
+                    tag: "brow",
+                },
+                {
+                    name: "Jitter Web",
+                    mode: 1,
+                    ratio: [5, 3],
+                    phase: 0.8,
+                    d1: 0.0002,
+                    d2: 0.0003,
+                    drift: 0.001,
+                    noiseAmp: 0.045,
+                    tag: "jit",
+                },
+                {
+                    name: "Lorenz",
+                    mode: 2,
+                    ratio: [3, 2],
+                    phase: 1.57,
+                    d1: 0,
+                    d2: 0,
+                    drift: 0,
+                    noiseAmp: 0.012,
+                    tag: "lorz",
+                },
+                {
+                    name: "Turbulent",
+                    mode: 2,
+                    ratio: [3, 2],
+                    phase: 1.57,
+                    d1: 0.0004,
+                    d2: 0.0005,
+                    drift: 0.0005,
+                    noiseAmp: 0.012,
+                    tag: "turb",
+                },
+                {
+                    name: "Strange",
+                    mode: 3,
+                    ratio: [3, 2],
+                    phase: 1.0,
+                    d1: 0.0003,
+                    d2: 0.0004,
+                    drift: 0.0008,
+                    noiseAmp: 0.03,
+                    tag: "stng",
+                },
+                {
+                    name: "Irrational",
+                    mode: 3,
+                    ratio: [4, 3],
+                    phase: 2.0,
+                    d1: 0,
+                    d2: 0,
+                    drift: 0.0015,
+                    noiseAmp: 0.055,
+                    tag: "irr",
+                },
+                {
+                    name: "Diffusion",
+                    mode: 4,
+                    ratio: [3, 2],
+                    phase: 1.57,
+                    d1: 0.0002,
+                    d2: 0.0002,
+                    drift: 0,
+                    noiseAmp: 0.012,
+                    tag: "diff",
+                },
+                {
+                    name: "Bifurcation",
+                    mode: 5,
+                    ratio: [3, 2],
+                    phase: 1.57,
+                    d1: 0,
+                    d2: 0,
+                    drift: 0.002,
+                    noiseAmp: 0.012,
+                    tag: "bif",
+                },
+            ];
+
+            // ════════════════════════════════════════════════════════════
+            //  WEBGL SETUP
+            // ════════════════════════════════════════════════════════════
+            const canvas = document.getElementById("gl");
+            const gl = canvas.getContext("webgl", {
+                antialias: false,
+                alpha: false,
+                preserveDrawingBuffer: true,
+            });
+
+            function resize() {
+                const wrap = document.getElementById("canvas-wrap");
+                const w = wrap.clientWidth;
+                const h = wrap.clientHeight;
+                const size = (Math.min(w, h) * 0.88) | 0;
+                canvas.width = canvas.height = size;
+                canvas.style.width = canvas.style.height = size + "px";
+                gl.viewport(0, 0, size, size);
+            }
+            window.addEventListener("resize", () => {
+                resize();
+                resetFB();
+            });
+
+            function compileShader(src, type) {
+                const s = gl.createShader(type);
+                gl.shaderSource(s, src);
+                gl.compileShader(s);
+                if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+                    console.error(gl.getShaderInfoLog(s));
+                return s;
+            }
+
+            function makeProgram(vs, fs) {
+                const p = gl.createProgram();
+                gl.attachShader(p, compileShader(vs, gl.VERTEX_SHADER));
+                gl.attachShader(p, compileShader(fs, gl.FRAGMENT_SHADER));
+                gl.linkProgram(p);
+                return p;
+            }
+
+            // ── CURVE PROGRAM: draws the Lissajous lines ──
+            const CURVE_VS = `
+attribute vec2 a_pos;
+attribute vec4 a_col;
+varying vec4 v_col;
+void main() {
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+  v_col = a_col;
+  gl_PointSize = 1.0;
+}`;
+
+            const CURVE_FS = `
+precision mediump float;
+varying vec4 v_col;
+void main() {
+  gl_FragColor = v_col;
+}`;
+
+            // ── POST PROGRAM: bloom/phosphor pass ──
+            const POST_VS = `
+attribute vec2 a_pos;
+varying vec2 v_uv;
+void main() {
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+  v_uv = a_pos * 0.5 + 0.5;
+}`;
+
+            const POST_FS = `
+precision mediump float;
+uniform sampler2D u_tex;
+uniform float u_bright;
+uniform float u_glow;
+varying vec2 v_uv;
+void main() {
+  vec2 uv = v_uv;
+  vec4 c = texture2D(u_tex, uv);
+
+  // Soft bloom
+  vec4 bloom = vec4(0.0);
+  float weight = 0.0;
+  for (int i = -3; i <= 3; i++) {
+    for (int j = -3; j <= 3; j++) {
+      float d = float(i*i + j*j);
+      float w = exp(-d * u_glow * 200.0);
+      bloom += texture2D(u_tex, uv + vec2(float(i), float(j)) * u_glow) * w;
+      weight += w;
+    }
+  }
+  bloom /= weight;
+
+  vec4 result = c + bloom * 0.6;
+  result.rgb *= u_bright;
+
+  // Phosphor tone-mapping
+  result.rgb = 1.0 - exp(-result.rgb * 1.2);
+
+  // Vignette
+  float vd = length(uv - 0.5) * 1.8;
+  result.rgb *= 1.0 - vd * vd * 0.4;
+
+  gl_FragColor = vec4(result.rgb, 1.0);
+}`;
+
+            // ── FEEDBACK PROGRAM: trails ──
+            const FB_FS = `
+precision mediump float;
+uniform sampler2D u_prev;
+uniform float u_persist;
+varying vec2 v_uv;
+void main() {
+  vec4 c = texture2D(u_prev, v_uv);
+  gl_FragColor = vec4(c.rgb * u_persist, c.a * u_persist);
+}`;
+
+            const curveProg = makeProgram(CURVE_VS, CURVE_FS);
+            const postProg = makeProgram(POST_VS, POST_FS);
+            const fbProg = makeProgram(POST_VS, FB_FS);
+
+            // Full-screen quad
+            const quadBuf = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+            gl.bufferData(
+                gl.ARRAY_BUFFER,
+                new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+                gl.STATIC_DRAW,
+            );
+
+            // Curve buffer
+            const N = 120000;
+            const posBuf = gl.createBuffer();
+            const colBuf = gl.createBuffer();
+            const posArr = new Float32Array(N * 2);
+            const colArr = new Float32Array(N * 4);
+
+            // Framebuffers
+            let fbA, fbB, texA, texB;
+
+            function makeTexFB() {
+                const tex = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_MIN_FILTER,
+                    gl.LINEAR,
+                );
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_MAG_FILTER,
+                    gl.LINEAR,
+                );
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_WRAP_S,
+                    gl.CLAMP_TO_EDGE,
+                );
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_WRAP_T,
+                    gl.CLAMP_TO_EDGE,
+                );
+                const s = canvas.width;
+                gl.texImage2D(
+                    gl.TEXTURE_2D,
+                    0,
+                    gl.RGBA,
+                    s,
+                    s,
+                    0,
+                    gl.RGBA,
+                    gl.UNSIGNED_BYTE,
+                    null,
+                );
+                const fb = gl.createFramebuffer();
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+                gl.framebufferTexture2D(
+                    gl.FRAMEBUFFER,
+                    gl.COLOR_ATTACHMENT0,
+                    gl.TEXTURE_2D,
+                    tex,
+                    0,
+                );
+                return { tex, fb };
+            }
+
+            function resetFB() {
+                if (texA) gl.deleteTexture(texA.tex);
+                if (texB) gl.deleteTexture(texB.tex);
+                const a = makeTexFB();
+                texA = a.tex;
+                fbA = a.fb;
+                const b = makeTexFB();
+                texB = b.tex;
+                fbB = b.fb;
+                clearFB(fbA);
+                clearFB(fbB);
+            }
+
+            function clearFB(fb) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+            }
+
+            resize();
+            resetFB();
+
+            // ════════════════════════════════════════════════════════════
+            //  CURVE GENERATION
+            // ════════════════════════════════════════════════════════════
+            function buildCurve() {
+                const {
+                    fx,
+                    fy,
+                    phase,
+                    d1,
+                    d2,
+                    iters,
+                    t: globalT,
+                    colorMode,
+                    curveMode,
+                    noiseAmp,
+                    noiseSpeed,
+                } = state;
+                const pal = PALETTES[colorMode];
+                let n = Math.min(iters, N);
+
+                if (curveMode === 0) {
+                    // ── LISSAJOUS / HARMONOGRAPH ──
+                    for (let i = 0; i < n; i++) {
+                        const tt = i * state.speed;
+                        const decay = Math.exp(-(d1 + d2) * tt);
+                        const x =
+                            decay *
+                            Math.sin(fx * tt + phase + state.drift * globalT);
+                        const y = decay * Math.sin(fy * tt);
+                        const normI = i / n;
+                        const alpha = Math.pow(1 - normI, 0.3) * 0.8 * decay;
+                        const [r, g, b, a] = pal.fn(normI, alpha);
+                        posArr[i * 2] = x;
+                        posArr[i * 2 + 1] = y;
+                        colArr[i * 4] = r;
+                        colArr[i * 4 + 1] = g;
+                        colArr[i * 4 + 2] = b;
+                        colArr[i * 4 + 3] = a;
+                    }
+                } else if (curveMode === 1) {
+                    // ── BROWNIAN HARMONOGRAPH: freq modulated by smooth noise ──
+                    for (let i = 0; i < n; i++) {
+                        const tt = i * state.speed;
+                        const decay = Math.exp(-(d1 + d2) * tt);
+                        const noiseFx =
+                            fx +
+                            noiseAmp *
+                                80 *
+                                noise1(tt * noiseSpeed + globalT * 0.003);
+                        const noiseFy =
+                            fy +
+                            noiseAmp *
+                                80 *
+                                noise2(
+                                    tt * noiseSpeed * 1.3 +
+                                        globalT * 0.003 +
+                                        10,
+                                );
+                        const noisePh =
+                            phase +
+                            noiseAmp *
+                                20 *
+                                noise3(
+                                    tt * noiseSpeed * 0.7 +
+                                        globalT * 0.002 +
+                                        20,
+                                ) +
+                            state.drift * globalT;
+                        const x = decay * Math.sin(noiseFx * tt + noisePh);
+                        const y =
+                            decay *
+                            Math.sin(
+                                noiseFy * tt +
+                                    noiseAmp *
+                                        15 *
+                                        noise4(tt * noiseSpeed * 0.9),
+                            );
+                        const normI = i / n;
+                        const alpha = Math.pow(1 - normI, 0.25) * 0.85 * decay;
+                        const [r, g, b, a] = pal.fn(normI, alpha);
+                        posArr[i * 2] = x;
+                        posArr[i * 2 + 1] = y;
+                        colArr[i * 4] = r;
+                        colArr[i * 4 + 1] = g;
+                        colArr[i * 4 + 2] = b;
+                        colArr[i * 4 + 3] = a;
+                    }
+                } else if (curveMode === 2) {
+                    // ── LORENZ ATTRACTOR PROJECTION ──
+                    const offset = (globalT * 12) % lorenzX.length;
+                    for (let i = 0; i < n; i++) {
+                        const idx = (offset + i) % lorenzX.length;
+                        const decay = Math.exp(-(d1 + d2) * i * state.speed);
+                        const x = lorenzX[idx] * decay;
+                        const y = lorenzY[idx] * decay;
+                        const normI = i / n;
+                        const alpha = Math.pow(1 - normI, 0.15) * 0.7 * decay;
+                        const [r, g, b, a] = pal.fn(
+                            normI * 0.5 + (idx / lorenzX.length) * 0.5,
+                            alpha,
+                        );
+                        posArr[i * 2] = x;
+                        posArr[i * 2 + 1] = y;
+                        colArr[i * 4] = r;
+                        colArr[i * 4 + 1] = g;
+                        colArr[i * 4 + 2] = b;
+                        colArr[i * 4 + 3] = a;
+                    }
+                } else if (curveMode === 3) {
+                    // ── STRANGE: irrational frequency ratio + phase noise → never closes ──
+                    const PHI = (1 + Math.sqrt(5)) / 2;
+                    const E = Math.E;
+                    for (let i = 0; i < n; i++) {
+                        const tt = i * state.speed * 0.5;
+                        const decay = Math.exp(-(d1 + d2) * tt);
+                        const pn1 =
+                            noise1(tt * noiseSpeed * 0.3 + globalT * 0.001) *
+                            noiseAmp *
+                            12;
+                        const pn2 =
+                            noise2(
+                                tt * noiseSpeed * 0.4 + globalT * 0.0015 + 5,
+                            ) *
+                            noiseAmp *
+                            12;
+                        const fxEff = fx * PHI + pn1 * state.drift * 200;
+                        const fyEff = fy * E + pn2 * state.drift * 200;
+                        const x =
+                            decay *
+                            Math.sin(
+                                fxEff * tt + phase + state.drift * globalT,
+                            );
+                        const y = decay * Math.sin(fyEff * tt + pn1);
+                        const normI = i / n;
+                        const alpha = Math.pow(1 - normI, 0.2) * 0.9 * decay;
+                        const [r, g, b, a] = pal.fn(normI, alpha);
+                        posArr[i * 2] = x;
+                        posArr[i * 2 + 1] = y;
+                        colArr[i * 4] = r;
+                        colArr[i * 4 + 1] = g;
+                        colArr[i * 4 + 2] = b;
+                        colArr[i * 4 + 3] = a;
+                    }
+                } else if (curveMode === 4) {
+                    // ── STOCHASTIC WALK: diffusion in phase space ──
+                    stepWalk(n);
+                    const amp = 0.85;
+                    for (let i = 0; i < n; i++) {
+                        const decay = Math.exp(
+                            -(d1 + d2) * i * state.speed * 0.3,
+                        );
+                        const x = walkX[i] * amp * decay;
+                        const y = walkY[i] * amp * decay;
+                        const normI = i / n;
+                        const alpha = Math.pow(1 - normI, 0.1) * 0.7;
+                        const [r, g, b, a] = pal.fn(normI, alpha);
+                        posArr[i * 2] = x;
+                        posArr[i * 2 + 1] = y;
+                        colArr[i * 4] = r;
+                        colArr[i * 4 + 1] = g;
+                        colArr[i * 4 + 2] = b;
+                        colArr[i * 4 + 3] = a;
+                    }
+                } else if (curveMode === 5) {
+                    // ── BIFURCATION DIAGRAM (logistic map) ──
+                    const pts = buildBifurcation(n);
+                    n = Math.min(n, pts.length);
+                    for (let i = 0; i < n; i++) {
+                        const [x, y] = pts[i];
+                        // add slow phase drift to y for animation
+                        const dy =
+                            Math.sin(
+                                x * fx * 0.5 + globalT * state.drift * 50,
+                            ) *
+                            noiseAmp *
+                            0.3;
+                        const normI = i / n;
+                        const alpha = 0.45;
+                        const [r, g, b, a] = pal.fn(normI, alpha);
+                        posArr[i * 2] = x;
+                        posArr[i * 2 + 1] = y + dy;
+                        colArr[i * 4] = r;
+                        colArr[i * 4 + 1] = g;
+                        colArr[i * 4 + 2] = b;
+                        colArr[i * 4 + 3] = a;
+                    }
+                }
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+                gl.bufferData(
+                    gl.ARRAY_BUFFER,
+                    posArr.subarray(0, n * 2),
+                    gl.STREAM_DRAW,
+                );
+                gl.bindBuffer(gl.ARRAY_BUFFER, colBuf);
+                gl.bufferData(
+                    gl.ARRAY_BUFFER,
+                    colArr.subarray(0, n * 4),
+                    gl.STREAM_DRAW,
+                );
+                return n;
+            }
+
+            // ════════════════════════════════════════════════════════════
+            //  RENDER LOOP
+            // ════════════════════════════════════════════════════════════
+            function drawQuad(prog) {
+                const loc = gl.getAttribLocation(prog, "a_pos");
+                gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+                gl.enableVertexAttribArray(loc);
+                gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+
+            function render() {
+                if (!state.paused) state.t += 1;
+
+                const n = buildCurve();
+
+                // ── Step 1: Feedback decay (fbA -> fbB) ──
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fbB);
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                gl.useProgram(fbProg);
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, texA);
+                gl.uniform1i(gl.getUniformLocation(fbProg, "u_prev"), 0);
+                gl.uniform1f(
+                    gl.getUniformLocation(fbProg, "u_persist"),
+                    state.persist,
+                );
+                drawQuad(fbProg);
+
+                // ── Step 2: Draw curve into fbB ──
+                gl.useProgram(curveProg);
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+                const posLoc = gl.getAttribLocation(curveProg, "a_pos");
+                const colLoc = gl.getAttribLocation(curveProg, "a_col");
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+                gl.enableVertexAttribArray(posLoc);
+                gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, colBuf);
+                gl.enableVertexAttribArray(colLoc);
+                gl.vertexAttribPointer(colLoc, 4, gl.FLOAT, false, 0, 0);
+
+                gl.drawArrays(gl.LINE_STRIP, 0, n);
+                gl.disable(gl.BLEND);
+
+                // Swap fbA <-> fbB
+                [fbA, fbB] = [fbB, fbA];
+                [texA, texB] = [texB, texA];
+
+                // ── Step 3: Post-process to screen ──
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                gl.clearColor(0, 0, 0, 1);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+
+                gl.useProgram(postProg);
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, texA);
+                gl.uniform1i(gl.getUniformLocation(postProg, "u_tex"), 0);
+                gl.uniform1f(
+                    gl.getUniformLocation(postProg, "u_bright"),
+                    state.bright,
+                );
+                gl.uniform1f(
+                    gl.getUniformLocation(postProg, "u_glow"),
+                    state.glowR,
+                );
+                drawQuad(postProg);
+
+                // Update HUD
+                const modeNames = [
+                    "LISS",
+                    "BROW",
+                    "LORZ",
+                    "STRG",
+                    "DIFF",
+                    "BIFR",
+                ];
+                document.getElementById("disp-fx").textContent = state.fx;
+                document.getElementById("disp-fy").textContent = state.fy;
+                document.getElementById("disp-phase").textContent = (
+                    state.phase / Math.PI
+                ).toFixed(2);
+                document.getElementById("disp-decay").textContent =
+                    modeNames[state.curveMode] || "????";
+
+                requestAnimationFrame(render);
+            }
+
+            // ════════════════════════════════════════════════════════════
+            //  UI SETUP
+            // ════════════════════════════════════════════════════════════
+
+            // Ratio grid
+            const ratioGrid = document.getElementById("ratio-grid");
+            RATIOS.forEach(([a, b], i) => {
+                const btn = document.createElement("button");
+                btn.className = "ratio-btn";
+                btn.textContent = `${a}:${b}`;
+                btn.addEventListener("click", () => {
+                    state.fx = a;
+                    state.fy = b;
+                    document.getElementById("fx-input").value = a;
+                    document.getElementById("fy-input").value = b;
+                    document
+                        .querySelectorAll(".ratio-btn")
+                        .forEach((x) => x.classList.remove("active"));
+                    btn.classList.add("active");
+                    clearFB(fbA);
+                    clearFB(fbB);
+                    state.t = 0;
+                });
+                if (a === 3 && b === 2) btn.classList.add("active");
+                ratioGrid.appendChild(btn);
+            });
+
+            // Custom freq inputs
+            function updateFreqFromInput() {
+                const a =
+                    parseInt(document.getElementById("fx-input").value) || 1;
+                const b =
+                    parseInt(document.getElementById("fy-input").value) || 1;
+                state.fx = Math.max(1, Math.min(20, a));
+                state.fy = Math.max(1, Math.min(20, b));
+                document
+                    .querySelectorAll(".ratio-btn")
+                    .forEach((x) => x.classList.remove("active"));
+                clearFB(fbA);
+                clearFB(fbB);
+                state.t = 0;
+            }
+            document
+                .getElementById("fx-input")
+                .addEventListener("change", updateFreqFromInput);
+            document
+                .getElementById("fy-input")
+                .addEventListener("change", updateFreqFromInput);
+
+            // Sliders
+            function bindSlider(id, key, fmt) {
+                const el = document.getElementById(id);
+                const valEl = document.getElementById(id + "-val");
+                el.addEventListener("input", () => {
+                    state[key] = parseFloat(el.value);
+                    valEl.textContent = fmt(state[key]);
+                    if (key === "d1" || key === "d2") {
+                        clearFB(fbA);
+                        clearFB(fbB);
+                        state.t = 0;
+                    }
+                });
+            }
+
+            bindSlider("phase", "phase", (v) => (v / Math.PI).toFixed(2) + "π");
+            bindSlider("drift", "drift", (v) => v.toFixed(4));
+            bindSlider("noiseAmp", "noiseAmp", (v) => v.toFixed(3));
+            bindSlider("noiseSpeed", "noiseSpeed", (v) => v.toFixed(2));
+            bindSlider("d1", "d1", (v) => v.toFixed(4));
+            bindSlider("d2", "d2", (v) => v.toFixed(4));
+            bindSlider("iters", "iters", (v) => Math.round(v / 1000) + "k");
+            bindSlider("speed", "speed", (v) => v.toFixed(3));
+            bindSlider("glow", "glowR", (v) => v.toFixed(3));
+            bindSlider("persist", "persist", (v) => v.toFixed(3));
+            bindSlider("bright", "bright", (v) => v.toFixed(1));
+
+            // Mode buttons
+            const MODE_DESCS = [
+                "Deterministic Lissajous figures with optional harmonograph decay",
+                "Freq modulated by smooth noise — a harmonograph that wanders",
+                "Lorenz strange attractor projected onto the xz-plane, animated",
+                "Irrational (φ, e) frequency ratios + phase noise → never repeats",
+                "Stochastic random walk in phase space with soft boundary",
+                "Logistic map bifurcation diagram — order collapsing into chaos",
+            ];
+            document
+                .getElementById("mode-grid")
+                .addEventListener("click", (e) => {
+                    const btn = e.target.closest(".mode-btn");
+                    if (!btn) return;
+                    const m = parseInt(btn.dataset.mode);
+                    state.curveMode = m;
+                    document
+                        .querySelectorAll(".mode-btn")
+                        .forEach((x) =>
+                            x.classList.toggle("active", x === btn),
+                        );
+                    document.getElementById("mode-desc").textContent =
+                        MODE_DESCS[m];
+                    if (m === 4) {
+                        walkX = [0];
+                        walkY = [0];
+                        walkSeed = mulberry32(Date.now() | 0);
+                    }
+                    clearFB(fbA);
+                    clearFB(fbB);
+                    state.t = 0;
+                });
+
+            // Color buttons
+            const colorRow = document.getElementById("color-row");
+            PALETTES.forEach((p, i) => {
+                const btn = document.createElement("button");
+                btn.className = "color-btn";
+                btn.textContent = p.label;
+                btn.style.color = P_COLORS[i];
+                btn.style.borderColor = i === 0 ? P_COLORS[0] : "var(--border)";
+                btn.addEventListener("click", () => {
+                    state.colorMode = i;
+                    document.querySelectorAll(".color-btn").forEach((x, j) => {
+                        x.style.borderColor =
+                            j === i ? P_COLORS[j] : "var(--border)";
+                        x.classList.toggle("active", j === i);
+                    });
+                });
+                if (i === 0) btn.classList.add("active");
+                colorRow.appendChild(btn);
+            });
+
+            // Presets
+            const presetGrid = document.getElementById("preset-grid");
+            PRESETS.forEach((p) => {
+                const btn = document.createElement("button");
+                btn.className = "preset-btn";
+                btn.innerHTML = `<span class="preset-tag tag-${p.tag}">${p.tag}</span><span class="preset-name">${p.name}</span><span class="preset-ratio">${p.ratio[0]}:${p.ratio[1]}</span>`;
+                btn.addEventListener("click", () => {
+                    state.curveMode = p.mode;
+                    state.fx = p.ratio[0];
+                    state.fy = p.ratio[1];
+                    state.phase = p.phase;
+                    state.d1 = p.d1;
+                    state.d2 = p.d2;
+                    state.drift = p.drift;
+                    state.noiseAmp = p.noiseAmp;
+                    document.getElementById("fx-input").value = p.ratio[0];
+                    document.getElementById("fy-input").value = p.ratio[1];
+                    document.getElementById("phase").value = p.phase;
+                    document.getElementById("d1").value = p.d1;
+                    document.getElementById("d2").value = p.d2;
+                    document.getElementById("drift").value = p.drift;
+                    document.getElementById("noiseAmp").value = p.noiseAmp;
+                    document.getElementById("phase-val").textContent =
+                        (p.phase / Math.PI).toFixed(2) + "π";
+                    document.getElementById("d1-val").textContent =
+                        p.d1.toFixed(4);
+                    document.getElementById("d2-val").textContent =
+                        p.d2.toFixed(4);
+                    document.getElementById("drift-val").textContent =
+                        p.drift.toFixed(4);
+                    document.getElementById("noiseAmp-val").textContent =
+                        p.noiseAmp.toFixed(3);
+                    document
+                        .querySelectorAll(".ratio-btn")
+                        .forEach((x) => x.classList.remove("active"));
+                    document
+                        .querySelectorAll(".mode-btn")
+                        .forEach((x) =>
+                            x.classList.toggle(
+                                "active",
+                                parseInt(x.dataset.mode) === p.mode,
+                            ),
+                        );
+                    document.getElementById("mode-desc").textContent =
+                        MODE_DESCS[p.mode];
+                    if (p.mode === 4) {
+                        walkX = [0];
+                        walkY = [0];
+                        walkSeed = mulberry32(Date.now() | 0);
+                    }
+                    clearFB(fbA);
+                    clearFB(fbB);
+                    state.t = 0;
+                });
+                presetGrid.appendChild(btn);
+            });
+
+            // Play/Pause
+            document
+                .getElementById("btn-play")
+                .addEventListener("click", () => {
+                    state.paused = !state.paused;
+                    document.getElementById("btn-play").textContent =
+                        state.paused ? "PLAY" : "PAUSE";
+                    document.getElementById("status-dot").className =
+                        "status-dot" + (state.paused ? " paused" : "");
+                    document.getElementById("status-text").textContent =
+                        state.paused ? "PAUSED" : "RENDERING";
+                });
+
+            // Reset
+            document
+                .getElementById("btn-reset")
+                .addEventListener("click", () => {
+                    state.t = 0;
+                    clearFB(fbA);
+                    clearFB(fbB);
+                });
+
+            // Save
+            document
+                .getElementById("btn-save")
+                .addEventListener("click", () => {
+                    const link = document.createElement("a");
+                    link.download = `harmonograph_${state.fx}_${state.fy}_${Date.now()}.png`;
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                });
+
+            // ════════════════════════════════════════════════════════════
+            //  GO
+            // ════════════════════════════════════════════════════════════
+            requestAnimationFrame(render);
+        </script>
+    </body>
+</html>
