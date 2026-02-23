@@ -441,7 +441,7 @@
     result.rgb *= 1.0 - vd * vd * 0.22;
 
     // Invert: dark purple lines on white canvas
-    result.rgb = 1.0 - result.rgb;
+    // result.rgb = 1.0 - result.rgb;
 
     gl_FragColor = vec4(result.rgb, 1.0);
   }`,
