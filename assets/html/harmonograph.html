@@ -228,7 +228,7 @@
                 iters: 60000,
                 speed: 0.045,
                 glowR: 0.007,
-                persist: 0.91,
+                persist: 0.0,
                 bright: 2.2,
                 noiseAmp: 0.032,
                 noiseSpeed: 1.1,
@@ -239,9 +239,9 @@
 
             // ── Purple palette — deep violet to soft lavender along the curve ──
             function purpleColor(normI, alpha) {
-                const r = 0.38 + normI * 0.28;
-                const g = 0.02 + normI * 0.1;
-                const b = 0.65 + normI * 0.22;
+                const r = 0.12 + normI * 0.08;
+                const g = 0.75 + normI * 0.2;
+                const b = 0.15 + normI * 0.1;
                 return [r, g, b, alpha];
             }
 
@@ -441,7 +441,7 @@
     result.rgb *= 1.0 - vd * vd * 0.22;
 
     // Invert: dark purple lines on white canvas
-    // result.rgb = 1.0 - result.rgb;
+    result.rgb = 1.0 - result.rgb;
 
     gl_FragColor = vec4(result.rgb, 1.0);
   }`,
