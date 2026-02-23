@@ -21,6 +21,6 @@ As computers become increasingly diverse in form-factor and people work with eac
 
 Moreover, as visualizations become increasingly complex and rich, why don't we engage other senses to offload what is typically entirely visual information processing?
 
-Outside of research, I enjoy playing around with rendering techniques, physics-based animation and other, more general visualizations. I'm also a big math-head, and like to solve problems in combinatorics, probability and algebra.
+Outside of research, I enjoy implementing graphical rendering techniques and physics-based animation. I also like recreational problem-solving in combinatorics, probability and algebra.
 
-My other interests include running/lifting, playing video games, playing the piano and listening to jazz, hip-hop and R&B music.
+My other interests include running/lifting, reading (especially politics, history, and philosophy), video games, playing the piano and listening to jazz, hip-hop and R&B music.
