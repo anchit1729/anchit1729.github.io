@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Library Demo
-permalink: /demo/
+title: hapticaudioengine
+permalink: /hapticaudioengine/
 nav: true
 nav_order: 3
 ---

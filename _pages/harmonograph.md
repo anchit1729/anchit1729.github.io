@@ -1,6 +1,5 @@
 ---
 layout: page
-title: harmonograph
 permalink: /harmonograph/
 nav: true
 nav_order: 5
