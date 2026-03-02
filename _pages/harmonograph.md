@@ -3,7 +3,7 @@ layout: page
 title: harmonograph
 permalink: /harmonograph/
 nav: true
-nav_order: 5
+nav_order: 4
 ---
 
 <div style="position:relative;width:100%;height:0;padding-bottom:100%;overflow:hidden;">
