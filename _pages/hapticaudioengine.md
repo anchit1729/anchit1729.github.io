@@ -6,13 +6,12 @@ nav: true
 nav_order: 3
 ---
 
-<div class="row">
+<div class="demo-embed-shell demo-embed-shell--vibration">
     <iframe 
+        class="demo-embed-frame demo-embed-frame--vibration"
         src="https://hapticaudioengine-demo.vercel.app" 
-        width="1000px" 
-        height="900px" 
-        frameborder="0" 
-        style="border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 4px;"
+        title="Haptic Audio Engine vibration design demo"
+        loading="lazy"
         allow="autoplay; fullscreen; microphone; camera; midi; bluetooth"
     ></iframe>
 </div>

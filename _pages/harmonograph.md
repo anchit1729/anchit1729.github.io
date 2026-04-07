@@ -6,10 +6,12 @@ nav: true
 nav_order: 4
 ---
 
-<div style="position:relative;width:100%;height:0;padding-bottom:100%;overflow:hidden;">
+<div class="demo-embed-shell demo-embed-shell--square">
   <iframe
+    class="demo-embed-frame"
     src="/assets/html/harmonograph.html"
-    style="position:absolute;inset:0;width:100%;height:100%;border:none;"
+    title="Harmonograph oscillator and attractor visualization"
+    loading="lazy"
     allowfullscreen>
   </iframe>
 </div>
