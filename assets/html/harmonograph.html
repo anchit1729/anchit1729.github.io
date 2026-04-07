@@ -17,21 +17,47 @@
             }
 
             :root {
-                --bg: #ffffff;
-                --border: rgba(100, 60, 160, 0.18);
-                --purple: #6a0dad;
-                --purple-dim: rgba(106, 13, 173, 0.38);
-                --text: #3a1a5c;
-                --text-dim: rgba(106, 13, 173, 0.42);
-                --ui-bg: rgba(247, 244, 240, 0.9);
+                --bg: #faf7fb;
+                --bg-ambient: #f3ebf7;
+                --paper: #fffdfd;
+                --paper-edge: rgba(181, 9, 172, 0.12);
+                --purple: #b509ac;
+                --purple-soft: rgba(181, 9, 172, 0.18);
+                --text: #26182f;
+                --text-dim: rgba(38, 24, 47, 0.58);
+                --ui-bg: rgba(255, 252, 255, 0.74);
+                --ui-shadow: 0 18px 40px rgba(32, 17, 41, 0.12);
+                --canvas-shadow: 0 28px 70px rgba(34, 13, 41, 0.18);
             }
 
             html,
             body {
                 width: 100%;
                 height: 100%;
-                background: var(--bg);
                 overflow: hidden;
+                background:
+                    radial-gradient(
+                        circle at top left,
+                        var(--purple-soft),
+                        transparent 36%
+                    ),
+                    radial-gradient(
+                        circle at bottom right,
+                        rgba(181, 9, 172, 0.08),
+                        transparent 28%
+                    ),
+                    linear-gradient(
+                        180deg,
+                        var(--bg-ambient),
+                        var(--bg) 32%,
+                        var(--paper)
+                    );
+                color: var(--text);
+            }
+
+            body {
+                position: relative;
+                font-family: "Cormorant Garamond", serif;
             }
 
             #canvas-wrap {
@@ -40,29 +66,56 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: var(--bg);
+                padding: clamp(6rem, 10vh, 7.25rem) clamp(1rem, 3vw, 2rem)
+                    clamp(7rem, 12vh, 8.5rem);
+            }
+
+            #canvas-wrap::before {
+                content: "";
+                position: absolute;
+                width: min(72vmin, 680px);
+                height: min(72vmin, 680px);
+                border-radius: 50%;
+                background: radial-gradient(
+                    circle,
+                    rgba(181, 9, 172, 0.08),
+                    transparent 68%
+                );
+                filter: blur(12px);
+                opacity: 0.9;
+                pointer-events: none;
             }
 
             canvas#gl {
+                position: relative;
                 display: block;
-                box-shadow: 0 4px 48px rgba(106, 13, 173, 0.09);
+                border-radius: 28px;
+                border: 1px solid var(--paper-edge);
+                background: var(--paper);
+                box-shadow: var(--canvas-shadow);
             }
 
-            /* ── Mode pill bar ── */
+            #mode-bar,
+            #info-bar {
+                z-index: 20;
+                border: 1px solid var(--paper-edge);
+                background: var(--ui-bg);
+                backdrop-filter: blur(18px);
+                box-shadow: var(--ui-shadow);
+            }
+
             #mode-bar {
                 position: fixed;
-                top: 26px;
+                top: 24px;
                 left: 50%;
                 transform: translateX(-50%);
-                z-index: 20;
                 display: flex;
-                gap: 2px;
-                background: var(--ui-bg);
-                border: 1px solid var(--border);
-                border-radius: 40px;
-                padding: 4px;
-                backdrop-filter: blur(14px);
-                box-shadow: 0 2px 18px rgba(106, 13, 173, 0.07);
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 4px;
+                width: min(calc(100% - 2rem), 540px);
+                padding: 6px;
+                border-radius: 999px;
             }
 
             .mode-pill {
@@ -70,89 +123,178 @@
                 font-size: 9px;
                 letter-spacing: 0.2em;
                 text-transform: uppercase;
-                padding: 7px 17px;
-                border-radius: 32px;
+                padding: 0.78rem 1.05rem;
+                border-radius: 999px;
                 border: none;
                 background: transparent;
                 color: var(--text-dim);
                 cursor: pointer;
-                transition: all 0.2s;
+                transition:
+                    transform 0.2s ease,
+                    background 0.2s ease,
+                    color 0.2s ease,
+                    box-shadow 0.2s ease;
                 white-space: nowrap;
             }
+
             .mode-pill:hover {
                 color: var(--purple);
-            }
-            .mode-pill.active {
-                background: var(--purple);
-                color: #fff;
-                box-shadow: 0 2px 14px rgba(106, 13, 173, 0.32);
+                transform: translateY(-1px);
             }
 
-            /* ── Mode description ── */
+            .mode-pill.active {
+                background: linear-gradient(135deg, var(--purple), #d264cb);
+                color: #fff;
+                box-shadow: 0 12px 24px rgba(181, 9, 172, 0.28);
+            }
+
             #mode-desc {
                 position: fixed;
-                bottom: 44px;
+                bottom: 78px;
                 left: 50%;
                 transform: translateX(-50%);
                 z-index: 20;
-                font-family: "Cormorant Garamond", serif;
+                width: min(calc(100% - 2rem), 560px);
                 font-style: italic;
                 font-weight: 300;
-                font-size: 12.5px;
+                font-size: clamp(14px, 2vw, 17px);
                 color: var(--text-dim);
-                letter-spacing: 0.04em;
+                letter-spacing: 0.03em;
+                text-align: center;
                 pointer-events: none;
-                white-space: nowrap;
             }
 
-            /* ── Bottom info strip ── */
             #info-bar {
                 position: fixed;
                 bottom: 20px;
                 left: 50%;
                 transform: translateX(-50%);
-                z-index: 20;
                 display: flex;
+                flex-wrap: wrap;
                 align-items: center;
-                gap: 20px;
+                justify-content: center;
+                gap: 0.85rem;
+                width: fit-content;
+                max-width: calc(100% - 2rem);
+                padding: 0.9rem 1.25rem;
+                border-radius: 999px;
                 font-family: "Share Tech Mono", monospace;
                 font-size: 9px;
                 letter-spacing: 0.2em;
                 color: var(--text-dim);
                 pointer-events: none;
-                white-space: nowrap;
             }
+
             #info-bar .sep {
-                opacity: 0.28;
+                opacity: 0.3;
             }
+
             #info-bar span {
                 color: var(--purple);
             }
 
-            /* ── Title watermark ── */
             #title-mark {
                 position: fixed;
-                top: 24px;
+                top: 30px;
                 left: 30px;
                 z-index: 20;
                 pointer-events: none;
+                padding: 0.9rem 1rem 0.8rem;
+                border: 1px solid var(--paper-edge);
+                border-radius: 20px;
+                background: var(--ui-bg);
+                backdrop-filter: blur(18px);
+                box-shadow: var(--ui-shadow);
             }
-            #title-mark .t1 {
-                font-family: "Cormorant Garamond", serif;
-                font-style: italic;
-                font-weight: 300;
-                font-size: 18px;
-                color: var(--text);
-                letter-spacing: 0.03em;
-                line-height: 1;
-            }
-            #title-mark .t2 {
+
+            #title-mark .eyebrow {
                 font-family: "Share Tech Mono", monospace;
-                font-size: 7px;
-                letter-spacing: 0.28em;
+                font-size: 8px;
+                letter-spacing: 0.24em;
                 color: var(--text-dim);
                 text-transform: uppercase;
-                margin-top: 4px;
+                margin-bottom: 0.45rem;
+            }
+
+            #title-mark .t1 {
+                font-style: italic;
+                font-weight: 300;
+                font-size: clamp(24px, 3vw, 30px);
+                color: var(--text);
+                letter-spacing: 0.03em;
+                line-height: 0.95;
+            }
+
+            #title-mark .t2 {
+                font-size: 14px;
+                color: var(--text-dim);
+                letter-spacing: 0.04em;
+                margin-top: 0.28rem;
+            }
+
+            @media (max-width: 780px) {
+                #canvas-wrap {
+                    padding-top: 7.9rem;
+                    padding-bottom: 8.75rem;
+                }
+
+                #title-mark {
+                    top: 18px;
+                    left: 16px;
+                    right: 16px;
+                    padding: 0.8rem 0.9rem;
+                }
+
+                #mode-bar {
+                    top: auto;
+                    bottom: 132px;
+                    width: min(calc(100% - 1rem), 560px);
+                }
+
+                #mode-desc {
+                    bottom: 90px;
+                    width: min(calc(100% - 1.2rem), 520px);
+                    font-size: 14px;
+                }
+
+                #info-bar {
+                    bottom: 14px;
+                    gap: 0.65rem;
+                    padding: 0.85rem 1rem;
+                }
+            }
+
+            @media (max-width: 560px) {
+                #canvas-wrap {
+                    padding: 8rem 0.75rem 9.5rem;
+                }
+
+                canvas#gl {
+                    border-radius: 22px;
+                }
+
+                #mode-bar {
+                    bottom: 126px;
+                    border-radius: 24px;
+                }
+
+                .mode-pill {
+                    flex: 1 1 calc(50% - 0.25rem);
+                    padding: 0.74rem 0.8rem;
+                }
+
+                #mode-desc {
+                    bottom: 84px;
+                }
+
+                #info-bar {
+                    border-radius: 24px;
+                    width: min(calc(100% - 1rem), 420px);
+                }
+
+                #info-bar .sep {
+                    display: none;
+                }
             }
 
             /* ── Save button ── */
@@ -186,10 +328,11 @@
             <canvas id="gl"></canvas>
         </div>
 
-        <!-- <div id="title-mark">
+        <div id="title-mark">
+            <div class="eyebrow">Generative Study</div>
             <div class="t1">Harmonograph</div>
-            <div class="t2">Phase Space Explorer</div>
-        </div> -->
+            <div class="t2">Oscillators and strange attractors</div>
+        </div>
 
         <div id="mode-bar">
             <button class="mode-pill active" data-mode="0">Lissajous</button>
@@ -237,12 +380,177 @@
                 curveMode: 0,
             };
 
-            // ── Purple palette — deep violet to soft lavender along the curve ──
-            function purpleColor(normI, alpha) {
-                const r = 0.12 + normI * 0.08;
-                const g = 0.75 + normI * 0.2;
-                const b = 0.15 + normI * 0.1;
-                return [r, g, b, alpha];
+            const wrap = document.getElementById("canvas-wrap");
+            const root = document.documentElement;
+            const theme = {
+                bg01: [0.98, 0.97, 0.99],
+                paper01: [1, 0.99, 0.99],
+            };
+
+            function clamp01(value) {
+                return Math.max(0, Math.min(1, value));
+            }
+
+            function hexToRgb(hex) {
+                const trimmed = hex.trim();
+                const rgbMatch = trimmed.match(
+                    /^rgba?\((\d+),\s*(\d+),\s*(\d+)/i,
+                );
+                if (rgbMatch) {
+                    return [
+                        Number(rgbMatch[1]),
+                        Number(rgbMatch[2]),
+                        Number(rgbMatch[3]),
+                    ];
+                }
+                const normalized = trimmed.replace("#", "");
+                const compact =
+                    normalized.length === 3
+                        ? normalized
+                              .split("")
+                              .map((char) => char + char)
+                              .join("")
+                        : normalized;
+                if (!/^[0-9a-fA-F]{6}$/.test(compact)) return [255, 255, 255];
+                return [
+                    parseInt(compact.slice(0, 2), 16),
+                    parseInt(compact.slice(2, 4), 16),
+                    parseInt(compact.slice(4, 6), 16),
+                ];
+            }
+
+            function mixRgb(a, b, t) {
+                return a.map((channel, i) =>
+                    Math.round(channel + (b[i] - channel) * t),
+                );
+            }
+
+            function rgbString(rgb) {
+                return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+            }
+
+            function rgbaString(rgb, alpha) {
+                return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+            }
+
+            function rgb255To01(rgb) {
+                return rgb.map((channel) => channel / 255);
+            }
+
+            function lerp(a, b, t) {
+                return a + (b - a) * t;
+            }
+
+            function mix01(a, b, t) {
+                return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+            }
+
+            function applyThemeFromParent() {
+                try {
+                    const hostRoot =
+                        window.parent && window.parent !== window
+                            ? window.parent.document.documentElement
+                            : document.documentElement;
+                    const styles = getComputedStyle(hostRoot);
+                    const bg = hexToRgb(
+                        styles.getPropertyValue("--global-bg-color") || "#ffffff",
+                    );
+                    const text = hexToRgb(
+                        styles.getPropertyValue("--global-text-color") || "#1c1c1d",
+                    );
+                    const accent = hexToRgb(
+                        styles.getPropertyValue("--global-theme-color") || "#b509ac",
+                    );
+                    const dark = hostRoot.dataset.theme === "dark";
+                    const white = [255, 255, 255];
+
+                    const ambient = dark
+                        ? mixRgb(bg, accent, 0.14)
+                        : mixRgb(bg, accent, 0.08);
+                    const paper = dark ? mixRgb(bg, white, 0.08) : mixRgb(bg, white, 0.38);
+                    const paperEdge = dark
+                        ? rgbaString(accent, 0.28)
+                        : rgbaString(accent, 0.16);
+                    const uiBg = dark
+                        ? rgbaString(mixRgb(bg, white, 0.08), 0.78)
+                        : rgbaString(mixRgb(bg, white, 0.75), 0.74);
+                    const textDim = dark
+                        ? rgbaString(mixRgb(text, white, 0.18), 0.76)
+                        : rgbaString(mixRgb(text, accent, 0.14), 0.62);
+
+                    root.style.setProperty("--bg", rgbString(bg));
+                    root.style.setProperty("--bg-ambient", rgbString(ambient));
+                    root.style.setProperty("--paper", rgbString(paper));
+                    root.style.setProperty("--paper-edge", paperEdge);
+                    root.style.setProperty("--purple", rgbString(accent));
+                    root.style.setProperty("--purple-soft", rgbaString(accent, dark ? 0.22 : 0.15));
+                    root.style.setProperty("--text", rgbString(text));
+                    root.style.setProperty("--text-dim", textDim);
+                    root.style.setProperty("--ui-bg", uiBg);
+                    root.style.setProperty(
+                        "--ui-shadow",
+                        dark
+                            ? "0 18px 44px rgba(0, 0, 0, 0.36)"
+                            : "0 18px 40px rgba(32, 17, 41, 0.12)",
+                    );
+                    root.style.setProperty(
+                        "--canvas-shadow",
+                        dark
+                            ? "0 28px 70px rgba(0, 0, 0, 0.38)"
+                            : "0 28px 70px rgba(34, 13, 41, 0.18)",
+                    );
+
+                    theme.bg01 = rgb255To01(bg);
+                    theme.paper01 = rgb255To01(paper);
+
+                    if (hostRoot !== document.documentElement && !applyThemeFromParent.bound) {
+                        const observer = new MutationObserver(() => {
+                            applyThemeFromParent();
+                        });
+                        observer.observe(hostRoot, {
+                            attributes: true,
+                            attributeFilter: ["data-theme", "style", "class"],
+                        });
+                        applyThemeFromParent.bound = true;
+                    }
+                } catch (error) {
+                    console.warn("Theme sync unavailable", error);
+                }
+            }
+            applyThemeFromParent.bound = false;
+
+            const MODE_PALETTES = [
+                [
+                    [0.28, 0.08, 0.4],
+                    [0.61, 0.12, 0.63],
+                    [0.93, 0.67, 0.9],
+                ],
+                [
+                    [0.2, 0.11, 0.39],
+                    [0.43, 0.21, 0.67],
+                    [0.79, 0.77, 0.96],
+                ],
+                [
+                    [0.1, 0.15, 0.38],
+                    [0.2, 0.41, 0.69],
+                    [0.69, 0.88, 0.98],
+                ],
+                [
+                    [0.36, 0.09, 0.31],
+                    [0.76, 0.21, 0.48],
+                    [0.98, 0.82, 0.62],
+                ],
+            ];
+
+            function curveColor(mode, normI, alpha) {
+                const palette = MODE_PALETTES[mode] || MODE_PALETTES[0];
+                const firstBlend = mix01(palette[0], palette[1], Math.pow(normI, 0.72));
+                const finalColor = mix01(
+                    firstBlend,
+                    palette[2],
+                    clamp01(Math.pow(normI, 1.18) * 0.95),
+                );
+                return [finalColor[0], finalColor[1], finalColor[2], alpha];
             }
 
             // ── Seeded PRNG (Mulberry32) ──
@@ -337,9 +645,19 @@
             });
 
             function resize() {
-                const size =
-                    (Math.min(window.innerWidth, window.innerHeight) * 0.82) |
-                    0;
+                const styles = getComputedStyle(wrap);
+                const availableWidth =
+                    wrap.clientWidth -
+                    parseFloat(styles.paddingLeft) -
+                    parseFloat(styles.paddingRight);
+                const availableHeight =
+                    wrap.clientHeight -
+                    parseFloat(styles.paddingTop) -
+                    parseFloat(styles.paddingBottom);
+                const size = Math.max(
+                    240,
+                    Math.floor(Math.min(availableWidth, availableHeight)),
+                );
                 canvas.width = canvas.height = size;
                 canvas.style.width = size + "px";
                 canvas.style.height = size + "px";
@@ -412,6 +730,7 @@
   uniform sampler2D u_tex;
   uniform float u_bright;
   uniform float u_glow;
+  uniform vec3 u_bg;
   varying vec2 v_uv;
   void main() {
     vec2 uv = v_uv;
@@ -440,10 +759,11 @@
     float vd = length(uv - 0.5) * 1.6;
     result.rgb *= 1.0 - vd * vd * 0.22;
 
-    // Invert: dark purple lines on white canvas
-    result.rgb = 1.0 - result.rgb;
+    vec3 paper = u_bg + vec3(0.012, 0.008, 0.016);
+    vec3 ink = result.rgb;
+    vec3 toned = max(paper - ink * 0.86, vec3(0.0));
 
-    gl_FragColor = vec4(result.rgb, 1.0);
+    gl_FragColor = vec4(toned, 1.0);
   }`,
             );
 
@@ -527,6 +847,7 @@
                 clearFB(fbB);
             }
 
+            applyThemeFromParent();
             resize();
             resetFB();
 
@@ -560,7 +881,7 @@
                         const ni = i / n;
                         const alpha =
                             Math.pow(1 - ni, 0.3) * 0.75 * (0.3 + decay * 0.7);
-                        const [r, g, b, a] = purpleColor(ni, alpha);
+                        const [r, g, b, a] = curveColor(curveMode, ni, alpha);
                         posArr[i * 2] = x;
                         posArr[i * 2 + 1] = y;
                         colArr[i * 4] = r;
@@ -599,7 +920,7 @@
                         const ni = i / n;
                         const alpha =
                             Math.pow(1 - ni, 0.2) * 0.8 * (0.2 + decay * 0.8);
-                        const [r, g, b, a] = purpleColor(ni, alpha);
+                        const [r, g, b, a] = curveColor(curveMode, ni, alpha);
                         posArr[i * 2] = x;
                         posArr[i * 2 + 1] = y;
                         colArr[i * 4] = r;
@@ -617,7 +938,8 @@
                         const y = lorenzY[idx] * (0.3 + decay * 0.7);
                         const ni = i / n;
                         const alpha = Math.pow(1 - ni, 0.12) * 0.65;
-                        const [r, g, b, a] = purpleColor(
+                        const [r, g, b, a] = curveColor(
+                            curveMode,
                             ni * 0.5 + (idx / lorenzX.length) * 0.5,
                             alpha,
                         );
@@ -651,7 +973,7 @@
                         const ni = i / n;
                         const alpha =
                             Math.pow(1 - ni, 0.18) * 0.85 * (0.2 + decay * 0.8);
-                        const [r, g, b, a] = purpleColor(ni, alpha);
+                        const [r, g, b, a] = curveColor(curveMode, ni, alpha);
                         posArr[i * 2] = x;
                         posArr[i * 2 + 1] = y;
                         colArr[i * 4] = r;
@@ -746,7 +1068,7 @@
                 // Pass 3 — bloom + invert → white background screen output
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
                 gl.viewport(0, 0, canvas.width, canvas.height);
-                gl.clearColor(1, 1, 1, 1);
+                gl.clearColor(theme.paper01[0], theme.paper01[1], theme.paper01[2], 1);
                 gl.clear(gl.COLOR_BUFFER_BIT);
 
                 gl.useProgram(postProg);
@@ -760,6 +1082,10 @@
                 gl.uniform1f(
                     gl.getUniformLocation(postProg, "u_glow"),
                     state.glowR,
+                );
+                gl.uniform3fv(
+                    gl.getUniformLocation(postProg, "u_bg"),
+                    new Float32Array(theme.paper01),
                 );
                 drawQuad(postProg);
 
