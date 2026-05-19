@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: मानव-सङ्गणक संवाद शास्त्री। Designing multisensory data representations for complex systems.
+subtitle: Designing multisensory data representations for complex systems.
 
 profile:
     align: right
