@@ -15,7 +15,7 @@ selected_papers: false # includes a list of papers marked as "selected={true}"
 social: false # includes social icons at the bottom of the page
 ---
 
-I am a PhD student at the University of Waterloo, working in Human-Computer Interaction under the supervision of Profs. Matthew Brehmer and Oliver Schneider.
+I am a PhD candidate at the University of Waterloo, working in Human-Computer Interaction under the supervision of Profs. Matthew Brehmer and Oliver Schneider.
 
 My research explores how complex data, such as time, uncertainty, and system dynamics, can be felt as well as seen. I study haptic and multisensory representations for information that is dynamic, ambiguous, or cognitively demanding, asking how interaction can move beyond conventional purely-visual displays.
 
